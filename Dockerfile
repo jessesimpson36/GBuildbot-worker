@@ -1,4 +1,4 @@
-FROM        buildbot/buildbot-worker:v3.2.0
+FROM        buildbot/buildbot-worker:v4.3.0
 MAINTAINER  alicef@gentoo.org
 
 USER root
@@ -11,7 +11,7 @@ RUN apt-get update && \
     apt-get -y upgrade && \
     apt-get -y dist-upgrade && \
     apt-get -y install -q \
-    clang clang-11 llvm llvm-11 lld lld-11 \
+    clang llvm lld \
     gcc-aarch64-linux-gnu \
     gcc-arm-linux-gnueabi \
     gcc-sparc64-linux-gnu \
@@ -19,6 +19,7 @@ RUN apt-get update && \
     gcc-powerpc64-linux-gnu \
     python3 \
     python3-ruamel.yaml \
+#    libpython3.11-dev \
     build-essential \
     kmod \
     gnupg \
@@ -34,20 +35,22 @@ RUN apt-get update && \
     autoconf \
     && rm -rf /var/lib/apt/lists/*
 
-RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-11 100
+#RUN update-alternatives --install /usr/bin/clang clang 100
 
 # Install python required packages
-RUN pip3 install --upgrade pip
-RUN pip3 install virtualenv
-RUN pip3 install lavacli
-RUN pip3 install beautifulsoup4
-RUN pip3 install lxml
-RUN pip3 install jsonschema
-RUN pip3 install pyyaml
-RUN pip3 install python-dateutil
+RUN pip3 install --break-system-packages --upgrade pip
+RUN pip3 install  --break-system-packages virtualenv
+RUN pip3 install  --break-system-packages lavacli
+RUN pip3 install  --break-system-packages beautifulsoup4
+RUN pip3 install  --break-system-packages lxml
+RUN pip3 install  --break-system-packages jsonschema
+RUN pip3 install  --break-system-packages pyyaml
+RUN pip3 install  --break-system-packages remote-pdb
+RUN pip3 install  --break-system-packages python-dateutil
 # Install newer jq fork version compatible with latest pip
-RUN pip3 install jq@git+https://github.com/spbnick/jq.py.git@1.1.2.post1
-RUN pip3 install --use-deprecated=legacy-resolver git+https://github.com/kernelci/kcidb.git@v8
+#RUN cp /usr/include/python3.11/cpython/* /usr/include/python3.11/
+RUN pip3 install  --break-system-packages jq@git+https://github.com/kernelci/jq.py.git@1.7.0.post1
+RUN pip3 install  --break-system-packages --use-deprecated=legacy-resolver git+https://github.com/kernelci/kcidb.git@v9
 
 # Create fileserver folder for passing files to lava
 RUN mkdir -p /var/www/fileserver
@@ -58,6 +61,8 @@ RUN groupmod -g $DOCKER_GID docker
 RUN usermod --append -G docker buildbot
 
 USER root
+RUN mkdir -p /buildbot
+RUN chown -R buildbot /buildbot
 WORKDIR /buildbot
 
 # Add kcidb configuration (if you are not sending to kernelci just comment out this)
