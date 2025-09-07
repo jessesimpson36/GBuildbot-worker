@@ -1,5 +1,5 @@
 FROM        buildbot/buildbot-worker:v4.3.0
-MAINTAINER  alicef@gentoo.org
+LABEL       org.opencontainers.image.authors="alicef@gentoo.org"
 
 USER root
 
